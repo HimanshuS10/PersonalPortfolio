@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Github, Linkedin, Mail, ExternalLink, Menu, X } from 'lucide-react';
 import GolfPic from './assets/GolfPic.jpeg'
 import Profile from './assets/Profile.png'
+import ExcelGPT from './assets/ExcelGPT.png'
+import GryphTutoring from './assets/GryphTutoring.png'
 
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -290,28 +292,75 @@ function App() {
                   title: "Intelligent Tutoring System",
                   description: "Full-stack tutoring application with AI-powered personalized learning. Features include a Machine Learning model for assessing mastery levels, an admin dashboard, and responsive UI/UX designed in Figma.",
                   tech: ["React.js", "Tailwind CSS", "Django", "Scikit-Learn", "OpenAI API", "Supabase"],
-                  link: "#",
+                  link: "https://github.com/HimanshuS10/ITS-GryphTutoring",
+                  website: "",
+                  image: GryphTutoring
                 },
                 {
                   title: "ExcelGPT",
-                  description: "Collaborative task management tool with real-time updates, drag-and-drop interface, and team features.",
+                  description: "Full-stack AI-powered application that analyzes Excel spreadsheets to quickly extract insights, reducing manual data analysis time. Built with React.js, Tailwind CSS, Python Flask, Pandas, and the Gemini API.",
                   tech: ["React.js", "Tailwind CSS", "Python Flask", "Google Gemini API"],
-                  link: "#"
+                  link: "https://github.com/HimanshuS10/ExcelGPT",
+                  website: "https://excelgpt.vercel.app/",
+                  image: ExcelGPT
                 },
               ].map((project, idx) => (
-                <div key={idx} className="bg-slate-900/50 backdrop-blur-sm rounded-lg p-6 border border-blue-900/30 hover:border-blue-500/50 transition-colors">
-                  <h3 className="text-xl font-semibold text-white mb-3">{project.title}</h3>
-                  <p className="text-slate-300 mb-4">{project.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tech.map((t) => (
-                      <span key={t} className="text-sm bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full">
-                        {t}
-                      </span>
-                    ))}
+                <div
+                  key={idx}
+                  className="bg-slate-900/50 backdrop-blur-sm rounded-lg border border-blue-900/30 hover:border-blue-500/50 transition-colors overflow-hidden flex flex-col"
+                >
+                  {/* Project Image */}
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-48 object-cover"
+                  />
+
+                  {/* Content */}
+                  <div className="p-6 flex flex-col flex-grow">
+                    <h3 className="text-xl text-center font-semibold text-white mb-3">
+                      {project.title}
+                    </h3>
+
+                    <p className="text-slate-300 mb-4 flex-grow">
+                      {project.description}
+                    </p>
+
+                    {/* Tech stack */}
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {project.tech.map((t) => (
+                        <span
+                          key={t}
+                          className="text-sm bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Links pinned to bottom */}
+                    <div className="mt-auto flex gap-4">
+                      <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        GitHub <ExternalLink size={16} />
+                      </a>
+
+                      {project.website && (
+                        <a
+                          href={project.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+                        >
+                          Website <ExternalLink size={16} />
+                        </a>
+                      )}
+                    </div>
                   </div>
-                  <a href={project.link} className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors">
-                    View Project <ExternalLink size={16} />
-                  </a>
                 </div>
               ))}
             </div>
