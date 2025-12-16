@@ -375,7 +375,7 @@ function App() {
               Interested in learning more about my experience and qualifications?
             </p>
             <a
-              href="./doc/HimanshuResume.pdf"
+              href="./doc/Himanshu Seervi Resume 2026.pdf"
               download="Himanshu_Seervi_Resume.pdf"
               className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:opacity-90 transition-opacity inline-block text-center"
             >
