@@ -115,7 +115,7 @@ function App() {
             </p>
             <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto">
               Passionate about building real-world projects that actually help solve problems using various technologies.
-              Currently seeking Software Engineering Internship opportunities for Summer 2025.
+              Currently seeking Software Engineering Internship opportunities for Summer 2026.
             </p>
             <div className="flex gap-4 justify-center">
               <button
@@ -375,7 +375,7 @@ function App() {
               Interested in learning more about my experience and qualifications?
             </p>
             <a
-              href="./doc/Himanshu Seervi Resume 2026.pdf"
+              href="./doc/Himanshu Seervi Resume 2025-26.pdf"
               download="Himanshu_Seervi_Resume.pdf"
               className="px-8 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:opacity-90 transition-opacity inline-block text-center"
             >
