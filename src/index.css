@@ -1,1 +1,10 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url('../src/assets/font/Roboto-VariableFont_wdth\,wght.ttf') format('truetype');
+}
+
 @import "tailwindcss";
+
+@theme  {
+    --font-mono: 'Roboto', sans-serif;
+}
