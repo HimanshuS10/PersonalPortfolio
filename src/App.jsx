@@ -60,7 +60,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center font-sans text-slate-300 selection:bg-blue-500/30 overflow-x-hidden">
 
-      <div className="relative w-full max-w-7xl bg-[#08090F] overflow-hidden border border-white/5 shadow-2xl min-h-[900px] flex flex-col">
+      <div className="relative w-full min-w-7xl bg-[#08090F] overflow-hidden border border-white/5 shadow-2xl min-h-[900px] flex flex-col">
 
         <div
           className="absolute top-0 left-0 w-full h-[650px] pointer-events-none opacity-20"
