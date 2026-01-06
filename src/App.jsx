@@ -60,7 +60,7 @@ const App = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center font-sans text-slate-300 selection:bg-blue-500/30 overflow-x-hidden">
 
-      <div className="relative w-full min-w-7xl bg-[#08090F] overflow-hidden border border-white/5 shadow-2xl min-h-[900px] flex flex-col">
+      <div className="relative w-full min-w-screen bg-[#08090F] overflow-hidden border border-white/5 shadow-2xl min-h-[900px] flex flex-col">
 
         <div
           className="absolute top-0 left-0 w-full h-[650px] pointer-events-none opacity-20"
@@ -81,7 +81,7 @@ const App = () => {
           <nav className="flex items-center justify-between w-full max-w-3xl px-3 py-2 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl pointer-events-auto">
             <div className="pl-4 pr-2">
               <div className="text-white font-semibold text-lg tracking-tight cursor-pointer hover:text-slate-200 transition-colors">
-                Himanshu.
+                Himanshu<span className='text-blue-400'>.</span>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-full px-2 py-1.5 border border-white/5">
