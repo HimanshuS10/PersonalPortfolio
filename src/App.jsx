@@ -91,7 +91,7 @@ const App = () => {
               <NavLink text="Contact" />
             </div>
             <div className="pl-2">
-              <a href="doc/Himanshu Seervi Resume 2025-26.pdf" download className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-slate-200 transition-all active:scale-95">
+              <a href="doc/Himanshu Seervi's Resume.pdf" download className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-slate-200 transition-all active:scale-95">
                 Resume
               </a>
             </div>
