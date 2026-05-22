@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp \"C:\\\\Users\\\\himse\\\\.claude\\\\image-cache\\\\710f6e37-62a6-4a8b-b9a2-31e0b4a606e6\\\\1.png\" \"C:\\\\Users\\\\himse\\\\Desktop\\\\School\\\\PersonalPortfolio\\\\src\\\\assets\\\\MintTests.png\")",
+      "Bash(cp \"C:\\\\Users\\\\himse\\\\.claude\\\\image-cache\\\\710f6e37-62a6-4a8b-b9a2-31e0b4a606e6\\\\3.png\" \"C:\\\\Users\\\\himse\\\\Desktop\\\\School\\\\PersonalPortfolio\\\\src\\\\assets\\\\MintCode.png\")",
+      "Bash(cp \"C:\\\\Users\\\\himse\\\\.claude\\\\image-cache\\\\710f6e37-62a6-4a8b-b9a2-31e0b4a606e6\\\\4.png\" \"C:\\\\Users\\\\himse\\\\Desktop\\\\School\\\\PersonalPortfolio\\\\src\\\\assets\\\\MintApp.png\")",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

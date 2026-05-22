@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Profile from './assets/Profile.png';
 import ExcelGPT from './assets/ExcelGPT.png';
 import BizReviewAI from './assets/BizReviewAI.png';
 import Archr from './assets/Archr.png';
+import MintApp from './assets/MintApp.png';
 import DotField from './DotField';
+import MintPage from './MintPage';
 
 const C = {
   bg: '#0A0A0A',
@@ -22,7 +25,7 @@ const C = {
   wTitleB: '#111111',
 };
 
-export default function App() {
+function Portfolio() {
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -45,6 +48,15 @@ export default function App() {
         html, body { overflow-x: hidden; max-width: 100%; }
       `}</style>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Portfolio />} />
+      <Route path="/project/mint" element={<MintPage />} />
+    </Routes>
   );
 }
 
@@ -504,6 +516,14 @@ function WorksSection() {
       image: BizReviewAI,
       github: 'https://github.com/HimanshuS10/BizReviewAI',
     },
+    {
+      title: 'Mint',
+      desc: 'NYC 311 civic complaint analytics platform. Transforms hundreds of thousands of service requests into interactive dashboards for civic operations analysts to identify trends and allocate resources.',
+      tech: ['React', 'TypeScript', 'Spring Boot', 'Java', 'PostgreSQL', 'Docker', 'Recharts'],
+      image: MintApp,
+      route: '/project/mint',
+      restricted: true,
+    },
   ];
 
   return (
@@ -517,16 +537,24 @@ function WorksSection() {
 
 function ProjCard({ p }) {
   const [h, setH] = useState(false);
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    if (p.route) navigate(p.route);
+  };
+
   return (
     <div
       onMouseEnter={() => setH(true)}
       onMouseLeave={() => setH(false)}
+      onClick={p.route ? handleCardClick : undefined}
       style={{
         border: `2px solid ${h ? C.accent : C.wBorder}`,
         borderRadius: '6px', overflow: 'hidden', background: '#111111',
         transition: 'border-color .2s, transform .2s, box-shadow .2s',
         transform: h ? 'translateY(-5px)' : 'none',
         boxShadow: h ? `4px 4px 0 ${C.accent}55` : `2px 2px 0 ${C.wBorder}`,
+        cursor: p.route ? 'pointer' : 'default',
       }}
     >
       <div style={{ height: 150, overflow: 'hidden', borderBottom: `2px solid ${C.wBorder}`, position: 'relative' }}>
@@ -544,6 +572,18 @@ function ProjCard({ p }) {
             }}>{p.title.charAt(0)}</span>
           </div>
         )}
+        {p.restricted && (
+          <div style={{
+            position: 'absolute', top: '8px', right: '8px',
+            background: 'rgba(10,10,10,0.88)',
+            border: '1px solid #FF5F5744',
+            borderRadius: '3px',
+            padding: '2px 7px',
+            fontSize: '10px',
+            fontFamily: '"Courier New", monospace',
+            color: '#FF5F57',
+          }}>private repo</div>
+        )}
       </div>
       <div style={{ padding: '14px 16px' }}>
         <h3 style={{ margin: '0 0 6px', fontSize: '15px', color: C.ink, fontWeight: '900' }}>{p.title}</h3>
@@ -559,16 +599,26 @@ function ProjCard({ p }) {
         </div>
         <div style={{ display: 'flex', gap: '14px', borderTop: `1px dashed ${C.grid}`, paddingTop: '10px' }}>
           {p.demo && (
-            <a href={p.demo} target="_blank" rel="noopener noreferrer" style={{
-              fontSize: '12px', fontFamily: '"Courier New", monospace',
-              color: C.accent, textDecoration: 'underline', fontWeight: '700',
-            }}>→ demo</a>
+            <a href={p.demo} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{
+                fontSize: '12px', fontFamily: '"Courier New", monospace',
+                color: C.accent, textDecoration: 'underline', fontWeight: '700',
+              }}>→ demo</a>
           )}
           {p.github && (
-            <a href={p.github} target="_blank" rel="noopener noreferrer" style={{
+            <a href={p.github} target="_blank" rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
+              style={{
+                fontSize: '12px', fontFamily: '"Courier New", monospace',
+                color: '#707070', textDecoration: 'underline',
+              }}>⌘ source</a>
+          )}
+          {p.route && (
+            <span style={{
               fontSize: '12px', fontFamily: '"Courier New", monospace',
-              color: '#707070', textDecoration: 'underline',
-            }}>⌘ source</a>
+              color: C.accent, fontWeight: '700',
+            }}>→ view project</span>
           )}
         </div>
       </div>
