@@ -14,21 +14,35 @@ const GRAV = 0.8;
 const MOVE = 3.6;
 const JUMP = -14;
 const H = 300; // logical canvas height (css px)
+const SAFE_X = 70; // start pad — the only safe ground when the floor is lava
+
+// course settings per level. rise = [first, last] ledge height above ground,
+// dip = how far every other ledge drops, moving = 1-based ledges that slide.
+const LEVELS = {
+  easy:   { label: 'EASY',   n: 5, rise: [60, 150], dip: 0,  minW: 70, maxW: 140, goalUp: 170, moving: [],     lava: false },
+  medium: { label: 'MEDIUM', n: 7, rise: [66, 170], dip: 26, minW: 48, maxW: 120, goalUp: 190, moving: [],     lava: false },
+  hard:   { label: 'HARD',   n: 9, rise: [70, 175], dip: 40, minW: 42, maxW: 70,  goalUp: 195, moving: [4, 6], lava: true },
+};
+const ORDER = ['easy', 'medium', 'hard'];
 
 export default function PixelGame() {
   const wrapRef = useRef(null);
   const canvasRef = useRef(null);
   const [coins, setCoins] = useState(0);
   const [total, setTotal] = useState(0);
+  const [falls, setFalls] = useState(0);
   const [active, setActive] = useState(false);
   const [won, setWon] = useState(false);
+  const [level, setLevel] = useState('easy');
 
   const keys = useRef({ left: false, right: false, jump: false });
   const activeRef = useRef(false);
   const wonRef = useRef(false);
+  const levelRef = useRef(level);
   const api = useRef(null);
 
   useEffect(() => { activeRef.current = active; }, [active]);
+  useEffect(() => { levelRef.current = level; api.current?.load(); }, [level]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -40,7 +54,7 @@ export default function PixelGame() {
     let t = 0; // frame counter (for bobbing)
 
     const start = { x: 40, y: H - 46 - 26 };
-    const player = { x: start.x, y: start.y, w: 22, h: 26, vx: 0, vy: 0, onGround: false, face: 1, squash: 0 };
+    const player = { x: start.x, y: start.y, w: 22, h: 26, vx: 0, vy: 0, onGround: false, face: 1, squash: 0, on: null };
 
     let ledges = [];      // one-way platforms
     let pickups = [];     // collectible stars
@@ -49,30 +63,38 @@ export default function PixelGame() {
     const groundY = () => H - 46;
 
     function buildLevel() {
+      const cfg = LEVELS[levelRef.current];
       const gy = groundY();
       ledges = [];
       pickups = [];
+      player.on = null;
 
       // course spans from startX to just before the goal on the right
       const startX = 80;
       const endX = W - Math.max(150, W * 0.16);
-      const N = 7; // number of parkour ledges
+      const N = cfg.n; // number of parkour ledges
       const stepX = (endX - startX) / N;
-      const lw = Math.max(48, Math.min(stepX * 0.62, 120)); // ledge width < step → no overlap
+      const lw = Math.max(cfg.minW, Math.min(stepX * 0.62, cfg.maxW)); // ledge width < step → no overlap
 
       // ascending zig-zag heights (px above ground) — capped so ledges +
-      // hovering stars stay inside the canvas (max ~170)
+      // hovering stars stay inside the canvas (max ~175)
+      const [lo, hi] = cfg.rise;
       const ups = [];
       for (let i = 1; i <= N; i++) {
-        let up = 66 + (i / N) * 104;       // rise 66 → 170
-        if (i % 2 === 0) up -= 26;          // dips for challenge
+        let up = lo + (i / N) * (hi - lo);
+        if (i % 2 === 0) up -= cfg.dip;     // dips for challenge
         ups.push(up);
       }
 
       for (let i = 1; i <= N; i++) {
         const x = startX + stepX * (i - 0.5);
         const y = gy - ups[i - 1];
-        ledges.push({ x, y, w: lw, h: 18 });
+        const ledge = { x, y, w: lw, h: 18 };
+        // sliding ledges swing around their home spot, staying clear of neighbours
+        if (cfg.moving.includes(i)) {
+          ledge.move = { base: x, amp: Math.min(30, (stepX - lw) * 0.45), speed: 0.03 + i * 0.002 };
+        }
+        ledges.push(ledge);
         // collectible star hovering above every other ledge
         if (i % 2 === 1) pickups.push({ x: x + lw / 2, y: y - 28, taken: false });
       }
@@ -81,7 +103,7 @@ export default function PixelGame() {
       // gpY kept low enough that the star + glow + "GOAL" label clear the top.
       const gpW = Math.max(150, W * 0.14);
       const gpX = Math.min(endX + stepX * 0.4, W - gpW - 12);
-      const gpY = gy - 190;
+      const gpY = gy - cfg.goalUp;
       ledges.push({ x: gpX, y: gpY, w: gpW, h: 18, goalPlat: true });
       goal = { x: gpX + gpW / 2 - 15, y: gpY - 40, w: 30, h: 34, cx: gpX + gpW / 2, cy: gpY - 22 };
 
@@ -101,13 +123,19 @@ export default function PixelGame() {
       if (player.x > W - 40) player.x = W - 40;
     }
 
+    function respawn() {
+      player.x = start.x; player.y = start.y; player.vx = 0; player.vy = 0; player.on = null;
+    }
+
     function reset() {
-      player.x = start.x; player.y = start.y; player.vx = 0; player.vy = 0;
+      respawn();
       particles = [];
       pickups.forEach(p => (p.taken = false));
-      wonRef.current = false; setWon(false); setCoins(0);
+      wonRef.current = false; setWon(false); setCoins(0); setFalls(0);
     }
-    api.current = { reset };
+
+    function load() { buildLevel(); reset(); }
+    api.current = { reset, load };
 
     function overlaps(a, b) {
       return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
@@ -124,6 +152,14 @@ export default function PixelGame() {
 
     function step() {
       t++;
+      // slide moving ledges, carrying the player if they're standing on one
+      for (const l of ledges) {
+        if (!l.move) continue;
+        const nx = l.move.base + Math.sin(t * l.move.speed) * l.move.amp;
+        if (player.on === l) player.x += nx - l.x;
+        l.x = nx;
+      }
+
       const { left, right, jump } = keys.current;
       player.vx = (right ? MOVE : 0) - (left ? MOVE : 0);
       if (right) player.face = 1; if (left) player.face = -1;
@@ -137,6 +173,7 @@ export default function PixelGame() {
       if (player.vy > 16) player.vy = 16;
       player.y += player.vy;
       player.onGround = false;
+      player.on = null;
       const newBottom = player.y + player.h;
 
       // one-way ledges — land only when falling onto the top edge
@@ -146,14 +183,20 @@ export default function PixelGame() {
             prevBottom <= l.y + 4 && newBottom >= l.y) {
           player.y = l.y - player.h;
           if (player.vy > 6) player.squash = Math.min(player.vy, 10);
-          player.vy = 0; player.onGround = true;
+          player.vy = 0; player.onGround = true; player.on = l;
         }
       }
-      // solid ground
+      // solid ground — or lava past the start pad on levels that have it
       if (player.y + player.h >= groundY()) {
-        player.y = groundY() - player.h;
-        if (player.vy > 6) player.squash = Math.min(player.vy, 10);
-        player.vy = 0; player.onGround = true;
+        if (LEVELS[levelRef.current].lava && !wonRef.current && player.x + player.w / 2 > SAFE_X) {
+          for (let i = 0; i < 8; i++) particles.push({ x: player.x + player.w / 2, y: groundY(), vx: (Math.random() - 0.5) * 5, vy: -Math.random() * 5 - 1, life: 26, kind: 'star' });
+          respawn();
+          setFalls(f => f + 1);
+        } else {
+          player.y = groundY() - player.h;
+          if (player.vy > 6) player.squash = Math.min(player.vy, 10);
+          player.vy = 0; player.onGround = true;
+        }
       }
 
       if (player.squash > 0) player.squash -= 0.8;
@@ -188,6 +231,20 @@ export default function PixelGame() {
         ctx.strokeStyle = P.bg; ctx.lineWidth = 1; ctx.strokeRect(i * s + 0.5, gy, s, s);
       }
       ctx.fillStyle = P.borderHi; ctx.fillRect(0, gy, W, 3);
+
+      // lava: diagonal hazard stripes past the start pad
+      if (LEVELS[levelRef.current].lava) {
+        ctx.save();
+        ctx.beginPath(); ctx.rect(SAFE_X, gy, W - SAFE_X, H - gy); ctx.clip();
+        ctx.fillStyle = P.bg; ctx.fillRect(SAFE_X, gy, W - SAFE_X, H - gy);
+        ctx.strokeStyle = P.border; ctx.lineWidth = 6;
+        ctx.beginPath();
+        const shift = (t * 0.6) % 24;
+        for (let x = SAFE_X - 60 + shift; x < W + 60; x += 24) { ctx.moveTo(x, gy); ctx.lineTo(x - 46, H); }
+        ctx.stroke();
+        ctx.restore();
+        ctx.fillStyle = P.dim; ctx.fillRect(SAFE_X, gy, W - SAFE_X, 3);
+      }
     }
 
     function drawLedge(l) {
@@ -315,6 +372,7 @@ export default function PixelGame() {
   }, []);
 
   const hold = (k, v) => (e) => { e.preventDefault(); keys.current[k] = v; };
+  const next = ORDER[ORDER.indexOf(level) + 1];
 
   return (
     <div
@@ -331,7 +389,18 @@ export default function PixelGame() {
         letterSpacing: '0.1em', pointerEvents: 'none', whiteSpace: 'nowrap',
       }}>
         <span style={{ color: P.white, fontFamily: DISPLAY, fontSize: '16px' }}>★ {coins}/{total}</span>
+        {LEVELS[level].lava && <span>FALLS: {falls}</span>}
         <span>{active ? '← → MOVE · SPACE JUMP · REACH THE ★' : 'HOVER TO PLAY'}</span>
+      </div>
+
+      {/* level picker */}
+      <div style={{ position: 'absolute', top: 8, left: 14, zIndex: 3, display: 'flex', gap: '6px' }}>
+        {ORDER.map(k => (
+          <LevelBtn key={k} on={level === k}
+            onClick={(e) => { e.currentTarget.blur(); setLevel(k); }}>
+            {LEVELS[k].label}
+          </LevelBtn>
+        ))}
       </div>
 
       <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: H }} />
@@ -347,16 +416,29 @@ export default function PixelGame() {
             ★ LEVEL CLEAR ★
           </div>
           <div style={{ fontFamily: MONO, fontSize: '12px', color: P.sub, letterSpacing: '0.1em' }}>
-            STARS COLLECTED: {coins}/{total}
+            {LEVELS[level].label} · STARS COLLECTED: {coins}/{total}
+            {LEVELS[level].lava && ` · FALLS: ${falls}`}
           </div>
-          <button
-            onClick={() => api.current?.reset()}
-            style={{
-              fontFamily: DISPLAY, fontSize: '18px', color: P.bg, background: P.white,
-              border: `2px solid ${P.white}`, padding: '10px 22px', cursor: 'pointer',
-              boxShadow: `4px 4px 0 ${P.line}`,
-            }}
-          >▶ PLAY AGAIN</button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              onClick={(e) => { e.currentTarget.blur(); api.current?.reset(); }}
+              style={{
+                fontFamily: DISPLAY, fontSize: '18px', color: P.white, background: P.panel,
+                border: `2px solid ${P.border}`, padding: '10px 22px', cursor: 'pointer',
+                boxShadow: `4px 4px 0 ${P.line}`,
+              }}
+            >↺ PLAY AGAIN</button>
+            {next && (
+              <button
+                onClick={(e) => { e.currentTarget.blur(); setLevel(next); }}
+                style={{
+                  fontFamily: DISPLAY, fontSize: '18px', color: P.bg, background: P.white,
+                  border: `2px solid ${P.white}`, padding: '10px 22px', cursor: 'pointer',
+                  boxShadow: `4px 4px 0 ${P.line}`,
+                }}
+              >▶ NEXT: {LEVELS[next].label}</button>
+            )}
+          </div>
         </div>
       )}
 
@@ -380,6 +462,20 @@ export default function PixelGame() {
         }
       `}</style>
     </div>
+  );
+}
+
+function LevelBtn({ children, on, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        fontFamily: MONO, fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em',
+        color: on ? P.bg : P.sub, background: on ? P.white : 'rgba(22,22,22,0.85)',
+        border: `2px solid ${on ? P.white : P.border}`, padding: '5px 9px', cursor: 'pointer',
+        boxShadow: `2px 2px 0 ${P.line}`,
+      }}
+    >{children}</button>
   );
 }
 

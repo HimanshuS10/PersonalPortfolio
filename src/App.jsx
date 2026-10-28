@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Profile from './assets/Profile.png';
 import ExcelGPT from './assets/ExcelGPT.png';
@@ -8,6 +8,7 @@ import MintApp from './assets/MintApp.png';
 import RepoLens from './assets/RepoLen.png';
 import MintPage from './MintPage';
 import PixelGame from './PixelGame';
+import Crosshair from './Crosshair';
 
 // ─── PALETTE: black / grey / white ──────────────────────────────────────
 const C = {
@@ -65,6 +66,7 @@ function Portfolio() {
         .cursor-blink { animation: cursor 1s step-end infinite; }
         .cloud { animation: floatX 9s ease-in-out infinite alternate; }
         .bob { animation: bob 2.4s steps(3) infinite; }
+        .hero-center > * { pointer-events: auto; }
         * { box-sizing: border-box; }
         html, body { overflow-x: hidden; max-width: 100%; margin: 0; background: ${C.bg}; }
         ::selection { background: ${C.white}; color: ${C.bg}; }
@@ -189,8 +191,9 @@ function PixelBlock({ size = 16, color = C.white }) {
 // ─── HERO ────────────────────────────────────────────────────────────────
 function Hero({ scrollTo }) {
   const isDesktop = useIsDesktop();
+  const heroRef = useRef(null);
   return (
-    <header style={{
+    <header ref={heroRef} style={{
       position: 'relative', minHeight: '100vh', paddingTop: '60px',
       display: 'flex', flexDirection: 'column', overflow: 'hidden',
       background: `radial-gradient(circle at 50% 0%, ${C.bgAlt} 0%, ${C.bg} 70%)`,
@@ -208,17 +211,17 @@ function Hero({ scrollTo }) {
       <Cloud style={{ top: '16%', left: '10%' }} />
       <Cloud style={{ top: '26%', right: '12%' }} scale={0.7} />
 
-      {/* center content */}
-      <div style={{
-        flex: 1, position: 'relative', zIndex: 2,
+      {/* center content — lets the pointer through to the clouds; children opt back in */}
+      <div className="hero-center" style={{
+        flex: 1, position: 'relative', zIndex: 2, pointerEvents: 'none',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
         justifyContent: 'center', textAlign: 'center', padding: '40px 20px 20px',
       }}>
-        <div style={{
+        <div data-crosshair-target style={{
           fontFamily: MONO, fontSize: '12px', color: C.dim, letterSpacing: '0.3em',
           border: `2px solid ${C.line}`, padding: '6px 14px', marginBottom: '26px',
         }}>
-          ● PLAYER 1 — HIMANSHU SEERVI
+          ● PLAYER 1 — SOFTWARE ENGINEER
         </div>
 
         <h1 style={{
@@ -227,7 +230,8 @@ function Hero({ scrollTo }) {
           color: C.white, letterSpacing: '0.02em',
           textShadow: `4px 4px 0 ${C.panel2}, 8px 8px 0 ${C.bgAlt}`,
         }}>
-          SOFTWARE<br />ENGINEER
+          <span data-crosshair-target style={{ display: 'inline-block' }}>HIMANSHU</span><br />
+          <span data-crosshair-target style={{ display: 'inline-block' }}>SEERVI</span>
         </h1>
 
         <div style={{ marginTop: '22px', minHeight: '30px' }}>
@@ -256,6 +260,10 @@ function Hero({ scrollTo }) {
 
       {/* playable pixel platformer — desktop/laptop only */}
       {isDesktop ? <PixelGame /> : <StaticGround />}
+
+      {/* crosshair cursor, kept under the fixed nav */}
+      <Crosshair containerRef={heroRef} color={C.white} targetEffect="lock"
+        thickness={1} opacity={0.6} smoothing={0.35} style={{ zIndex: 40 }} />
     </header>
   );
 }
@@ -323,7 +331,11 @@ function Cloud({ style, scale = 1 }) {
   const px = 10 * scale;
   const c = C.sub; // lighter clouds for visibility
   return (
-    <div className="cloud" style={{ position: 'absolute', zIndex: 1, opacity: 0.75, ...style }}>
+    // padding matches the box-shadow overhang so the crosshair lock frames the whole cloud
+    <div className="cloud" data-crosshair-target style={{
+      position: 'absolute', zIndex: 1, opacity: 0.75,
+      padding: `${px}px ${px * 3}px 0 ${px}px`, ...style,
+    }}>
       <div style={{
         width: px * 5, height: px * 2, background: c, position: 'relative',
         boxShadow: `${px}px ${-px}px 0 ${c}, ${px * 2}px ${-px}px 0 ${c}, ${px * 3}px 0 0 ${c}, ${-px}px 0 0 ${c}`,
@@ -372,7 +384,7 @@ function TypingHero() {
   }, [n, del, i]);
 
   return (
-    <span style={{ fontFamily: MONO, fontSize: 'clamp(14px, 2.6vw, 20px)', color: C.sub }}>
+    <span data-crosshair-target style={{ display: 'inline-block', fontFamily: MONO, fontSize: 'clamp(14px, 2.6vw, 20px)', color: C.sub }}>
       <span style={{ color: C.dim }}>&gt; </span>
       {txt}
       <span className="cursor-blink" style={{
@@ -527,7 +539,7 @@ function Chip({ children }) {
 function WorkSection() {
   const jobs = [
     {
-      role: 'Software Engineer Intern',
+      role: 'Product Developer',
       company: 'The Simple Knot Inc. · Guelph, ON',
       period: 'APR 2026 – AUG 2026',
       desc: 'Developed and integrated REST APIs connecting Instagram and Pinterest into the platform — handling authentication, error states, and data mapping between services. Owned end-to-end delivery of features on a production iOS & Android app serving 400+ clients, using AI-assisted tooling for refactoring and test scaffolding while validating all output through code reviews and CI/CD.',
