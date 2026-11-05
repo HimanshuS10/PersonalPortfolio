@@ -7,6 +7,7 @@ import Archr from './assets/Archr.png';
 import MintApp from './assets/MintApp.png';
 import RepoLens from './assets/RepoLen.png';
 import MintPage from './MintPage';
+import BtgPage from './BtgPage';
 import PixelGame from './PixelGame';
 import Crosshair from './Crosshair';
 
@@ -81,6 +82,7 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Portfolio />} />
       <Route path="/project/mint" element={<MintPage />} />
+      <Route path="/btg" element={<BtgPage />} />
     </Routes>
   );
 }
