@@ -2,7 +2,8 @@
 // Kept verbatim — attendees copy these straight into AI Studio.
 
 const REVIEWS_SHEET = 'https://docs.google.com/spreadsheets/d/1EwbkeE01KoR854sb6KkLo8QvE8WuVvFfm8eb6fZr_t4';
-const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1bp17CLmqj0HHV0y3ObN6fOOSSSS--xoVfr0xCMEml2c';
+const INVENTORY_SHEET = 'https://docs.google.com/spreadsheets/d/1F0sae31e0Iqad-PP6PwYf4SQxyvpUOKT4bZTDYjXvRo';
+const INVENTORY_GID = '607843687';
 
 // Files attendees need. `img` entries get a thumbnail; `links` are the buttons.
 export const RESOURCES = [
@@ -36,7 +37,7 @@ export const RESOURCES = [
     note: 'Download it as Excel or CSV, then use "Upload file" on the Inventory page.',
     links: [
       { label: 'download .xlsx', href: `${INVENTORY_SHEET}/export?format=xlsx` },
-      { label: 'download .csv', href: `${INVENTORY_SHEET}/export?format=csv&gid=0` },
+      { label: 'download .csv', href: `${INVENTORY_SHEET}/export?format=csv&gid=${INVENTORY_GID}` },
       { label: 'open sheet', href: `${INVENTORY_SHEET}/edit?usp=sharing` },
     ],
   },
